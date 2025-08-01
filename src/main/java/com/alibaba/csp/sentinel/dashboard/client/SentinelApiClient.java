@@ -86,6 +86,7 @@ import java.util.stream.Collectors;
 
 /**
  * Communicate with Sentinel client.
+ * Sentinel 控制台与客户端通信的桥梁，负责将控制台的配置下发到客户端，并从客户端收集监控数据和当前规则状态。
  *
  * @author leyou
  */

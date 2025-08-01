@@ -15,8 +15,10 @@
  */
 package com.alibaba.csp.sentinel.dashboard.rule.nacos;
 
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.datasource.Converter;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.config.ConfigFactory;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * Nacos配置服务类，主要配置Json和数据对象转换器，以及配置ConfigService的实例
+ *
  * @author Eric Zhao
  * @since 1.4.0
  */
@@ -50,6 +54,18 @@ public class NacosConfig {
         return s -> JSON.parseArray(s, FlowRuleEntity.class);
     }
 
+    @Bean
+    public Converter<String, List<DegradeRuleEntity>> degradeRuleEntityDecoder() {
+        return s -> JSON.parseArray(s, DegradeRuleEntity.class);
+    }
+
+    @Bean
+    public Converter<List<DegradeRuleEntity>, String> degradeRuleEntityEncoder() {
+        return list -> {
+            return prettyJson(JSON.toJSONString( list));
+        };
+    }
+
     /**
      * 美化Json
      *
@@ -62,13 +78,25 @@ public class NacosConfig {
         return gson.toJson(jsonArray);
     }
 
+    /**
+     * 实例化ConfigService，指定数据源为Nacos，从配置文件读取Nacos配置
+     * Nacos配置信息见：{@link NacosPropertiesConfig}
+     *
+     * @param propertiesConfig  nacos配置信息
+     * @return  配置服务实例
+     * @throws Exception    .
+     */
     @Bean
     public ConfigService nacosConfigService(NacosPropertiesConfig propertiesConfig) throws Exception {
         Properties properties = new Properties();
         properties.put(PropertyKeyConst.SERVER_ADDR, propertiesConfig.getServerAddr());
         properties.put(PropertyKeyConst.NAMESPACE, propertiesConfig.getNamespace());
-        // properties.put(PropertyKeyConst.USERNAME, propertiesConfig.getUsername());
-        // properties.put(PropertyKeyConst.PASSWORD, propertiesConfig.getPassword());
+        if (StringUtil.isNotEmpty(propertiesConfig.getUsername())) {
+            properties.put(PropertyKeyConst.USERNAME, propertiesConfig.getUsername());
+        }
+        if (StringUtil.isNotEmpty(propertiesConfig.getPassword())) {
+            properties.put(PropertyKeyConst.PASSWORD, propertiesConfig.getPassword());
+        }
         return ConfigFactory.createConfigService(properties);
     }
 }

@@ -238,16 +238,20 @@ angular
             }
        })
 
-      .state('dashboard.degrade', {
-        templateUrl: 'app/views/degrade.html',
-        url: '/degrade/:app',
-        controller: 'DegradeCtl',
+      // degrade.html改为degrade_v2.html
+      // url改为：/v2/degrade/:app
+      // js文件改为degrade_v2.js
+      // DegradeCtl改为DegradeCtlV2
+      .state('dashboard.degrade', {                                         // 前端方法名称
+        templateUrl: 'app/views/degrade_v2.html',                           // 调用方法后跳转的html页面
+        url: '/v2/degrade/:app',                                            // 请求的后端requestMapping路径
+        controller: 'DegradeCtlV2',                                         // 前端转发路由规则实现名，注意不是后端controller名称
         resolve: {
           loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
             return $ocLazyLoad.load({
               name: 'sentinelDashboardApp',
               files: [
-                'app/scripts/controllers/degrade.js',
+                'app/scripts/controllers/degrade_v2.js',                    // 前端路由规则实现js路径
               ]
             });
           }]
